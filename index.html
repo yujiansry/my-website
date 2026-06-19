@@ -7,7 +7,6 @@
   <style>
     :root {
       --bg-primary: #0a0a1a;
-      --bg-secondary: #111128;
       --bg-card: rgba(255, 255, 255, 0.04);
       --bg-card-hover: rgba(255, 255, 255, 0.08);
       --border: rgba(255, 255, 255, 0.08);
@@ -23,11 +22,10 @@
       --tag-border: rgba(108, 99, 255, 0.3);
       --progress-bg: rgba(255, 255, 255, 0.08);
       --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+      --nav-bg: rgba(10, 10, 26, 0.95);
     }
-
     [data-theme="light"] {
       --bg-primary: #f5f5f7;
-      --bg-secondary: #ffffff;
       --bg-card: rgba(0, 0, 0, 0.03);
       --bg-card-hover: rgba(0, 0, 0, 0.06);
       --border: rgba(0, 0, 0, 0.08);
@@ -39,11 +37,10 @@
       --tag-border: rgba(108, 99, 255, 0.2);
       --progress-bg: rgba(0, 0, 0, 0.06);
       --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+      --nav-bg: rgba(245, 245, 247, 0.95);
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
       background: var(--bg-primary);
@@ -53,382 +50,263 @@
       transition: background 0.4s, color 0.4s;
     }
 
-    .bg-gradient {
+    /* Particle Canvas */
+    #particleCanvas {
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background:
-        radial-gradient(ellipse at 20% 0%, rgba(108, 99, 255, 0.12) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 100%, rgba(228, 77, 255, 0.08) 0%, transparent 50%);
-      pointer-events: none;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       z-index: 0;
-      transition: opacity 0.4s;
+      pointer-events: none;
     }
-
-    [data-theme="light"] .bg-gradient { opacity: 0.5; }
 
     /* Top Bar */
     .topbar {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 1rem 2rem;
-      background: transparent;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      display: flex; justify-content: flex-end; align-items: center;
+      gap: 0.5rem; padding: 1rem 2rem;
     }
-
     .topbar button {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      width: 40px; height: 40px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 1.1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s;
-      backdrop-filter: blur(10px);
+      background: var(--bg-card); border: 1px solid var(--border);
+      color: var(--text-secondary); width: 40px; height: 40px;
+      border-radius: 12px; cursor: pointer; font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s; backdrop-filter: blur(10px);
     }
-
     .topbar button:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--border-hover);
+      background: var(--bg-card-hover); border-color: var(--border-hover);
       color: var(--text-primary);
     }
 
-    .container {
-      position: relative;
-      z-index: 1;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 5rem 1.5rem 3rem;
+    /* Side Nav */
+    .side-nav {
+      position: fixed; left: 1.5rem; top: 50%; transform: translateY(-50%);
+      z-index: 150; display: flex; flex-direction: column; gap: 0.4rem;
+    }
+    .side-nav a {
+      display: flex; align-items: center; gap: 0.5rem;
+      text-decoration: none; color: var(--text-muted);
+      font-size: 0.7rem; transition: all 0.3s; padding: 0.3rem 0;
+    }
+    .side-nav a .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--text-muted); transition: all 0.3s;
+    }
+    .side-nav a .label {
+      opacity: 0; transform: translateX(-5px);
+      transition: all 0.3s; white-space: nowrap;
+    }
+    .side-nav a:hover .label { opacity: 1; transform: translateX(0); }
+    .side-nav a.active { color: var(--accent-light); }
+    .side-nav a.active .dot {
+      background: var(--accent-light);
+      box-shadow: 0 0 8px rgba(108, 99, 255, 0.6);
+      width: 8px; height: 8px;
     }
 
-    /* Scroll Animations */
+    .container {
+      position: relative; z-index: 1;
+      max-width: 900px; margin: 0 auto; padding: 5rem 1.5rem 3rem;
+    }
+
+    /* Reveal Animation */
     .reveal {
-      opacity: 0;
-      transform: translateY(30px);
+      opacity: 0; transform: translateY(30px);
       transition: opacity 0.6s ease, transform 0.6s ease;
     }
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
 
-    /* Section */
     .section { margin-bottom: 3rem; }
 
     .section-header {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 1.2rem;
-      cursor: pointer;
-      user-select: none;
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 1.2rem; cursor: pointer; user-select: none;
     }
-
     .section-title {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: var(--accent-light);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.15em; color: var(--accent-light);
+      display: flex; align-items: center; gap: 0.5rem;
     }
-
     .section-title::after {
-      content: '';
-      flex: 1;
-      height: 1px;
+      content: ''; flex: 1; height: 1px;
       background: linear-gradient(to right, var(--border), transparent);
     }
-
-    .toggle-icon {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      transition: transform 0.3s;
-    }
-
+    .toggle-icon { font-size: 0.7rem; color: var(--text-muted); transition: transform 0.3s; }
     .section.collapsed .toggle-icon { transform: rotate(-90deg); }
     .section.collapsed .section-body { display: none; }
 
     .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.5rem;
-      transition: all 0.3s ease;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.5rem; transition: all 0.3s ease;
     }
-
-    .card:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--border-hover);
-      box-shadow: var(--shadow);
-    }
-
+    .card:hover { background: var(--bg-card-hover); border-color: var(--border-hover); box-shadow: var(--shadow); }
     .card + .card { margin-top: 1rem; }
 
     .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 0.5rem;
-      flex-wrap: wrap;
-      gap: 0.5rem;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;
     }
-
     .card-title { font-size: 1.1rem; font-weight: 600; }
     .card-subtitle { font-size: 0.9rem; color: var(--text-secondary); }
     .card-date { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; }
 
     .card-desc {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      line-height: 1.7;
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.4s ease, opacity 0.3s ease;
-      opacity: 0;
+      font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7;
+      max-height: 0; overflow: hidden; transition: max-height 0.4s ease, opacity 0.3s ease; opacity: 0;
     }
-
-    .card.expanded .card-desc {
-      max-height: 500px;
-      opacity: 1;
-    }
+    .card.expanded .card-desc { max-height: 600px; opacity: 1; }
 
     .expand-btn {
-      background: none;
-      border: none;
-      color: var(--accent-light);
-      font-size: 0.8rem;
-      cursor: pointer;
-      padding: 0.3rem 0;
-      transition: opacity 0.3s;
+      background: none; border: none; color: var(--accent-light);
+      font-size: 0.8rem; cursor: pointer; padding: 0.3rem 0; transition: opacity 0.3s;
     }
-
     .expand-btn:hover { opacity: 0.7; }
 
     .card-desc ul { list-style: none; padding: 0; }
-    .card-desc li {
-      padding: 0.2rem 0;
-      padding-left: 1rem;
-      position: relative;
-    }
-    .card-desc li::before {
-      content: '›';
-      position: absolute;
-      left: 0;
-      color: var(--accent);
-      font-weight: 700;
-    }
+    .card-desc li { padding: 0.2rem 0; padding-left: 1rem; position: relative; }
+    .card-desc li::before { content: '›'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
 
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-top: 0.8rem;
-    }
-
+    .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.8rem; }
     .tag {
-      font-size: 0.75rem;
-      padding: 0.25rem 0.6rem;
-      background: var(--tag-bg);
-      border: 1px solid var(--tag-border);
-      border-radius: 6px;
-      color: var(--accent-light);
+      font-size: 0.75rem; padding: 0.25rem 0.6rem;
+      background: var(--tag-bg); border: 1px solid var(--tag-border);
+      border-radius: 6px; color: var(--accent-light);
     }
 
     /* Hero */
-    .hero {
-      text-align: center;
-      padding: 3rem 2rem;
-      margin-bottom: 3rem;
-    }
-
+    .hero { text-align: center; padding: 3rem 2rem; margin-bottom: 3rem; }
     .avatar {
-      width: 110px; height: 110px;
-      border-radius: 50%;
+      width: 110px; height: 110px; border-radius: 50%;
       background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-      margin: 0 auto 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.8rem;
-      box-shadow: 0 0 40px rgba(108, 99, 255, 0.35);
+      margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center;
+      font-size: 2.8rem; box-shadow: 0 0 40px rgba(108, 99, 255, 0.35);
       animation: pulse 3s ease-in-out infinite;
     }
-
     @keyframes pulse {
       0%, 100% { box-shadow: 0 0 40px rgba(108, 99, 255, 0.35); }
       50% { box-shadow: 0 0 60px rgba(108, 99, 255, 0.5); }
     }
-
     .hero h1 {
-      font-size: 2.2rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
+      font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem;
       background: linear-gradient(135deg, var(--text-primary), var(--accent-light));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-
-    .hero .tagline {
-      font-size: 1.05rem;
-      color: var(--text-secondary);
-      margin-bottom: 1.2rem;
-    }
-
+    .hero .tagline { font-size: 1.05rem; color: var(--text-secondary); margin-bottom: 1.2rem; }
     .hero .bio {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      max-width: 500px;
-      margin: 0 auto 1.5rem;
-      line-height: 1.8;
+      font-size: 0.9rem; color: var(--text-muted); max-width: 500px;
+      margin: 0 auto 1.5rem; line-height: 1.8; min-height: 3.6em;
     }
+    .typewriter-cursor {
+      display: inline-block; width: 2px; height: 1em;
+      background: var(--accent-light); margin-left: 2px;
+      animation: blink 0.8s step-end infinite; vertical-align: text-bottom;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
 
     .contact-row {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-      font-size: 0.85rem;
+      display: flex; justify-content: center; flex-wrap: wrap;
+      gap: 1rem; font-size: 0.85rem;
     }
-
-    .contact-row a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      transition: color 0.3s;
-    }
+    .contact-row a { color: var(--text-secondary); text-decoration: none; transition: color 0.3s; }
     .contact-row a:hover { color: var(--accent-light); }
+    .contact-item { display: flex; align-items: center; gap: 0.3rem; color: var(--text-muted); }
 
-    .contact-item {
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-      color: var(--text-muted);
+    /* Timeline */
+    .timeline { position: relative; padding-left: 2rem; }
+    .timeline::before {
+      content: ''; position: absolute; left: 6px; top: 0; bottom: 0;
+      width: 2px; background: linear-gradient(to bottom, var(--accent), var(--gradient-end));
+      border-radius: 1px;
     }
-
-    /* Skills with Progress */
-    .skills-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 1.2rem;
+    .timeline-item {
+      position: relative; margin-bottom: 1.5rem;
+      padding: 1.2rem 1.5rem; background: var(--bg-card);
+      border: 1px solid var(--border); border-radius: 14px;
+      transition: all 0.3s;
     }
-
-    .skill-item {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
+    .timeline-item:hover { background: var(--bg-card-hover); border-color: var(--border-hover); box-shadow: var(--shadow); }
+    .timeline-item::before {
+      content: ''; position: absolute; left: -2rem; top: 1.5rem;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--accent); border: 3px solid var(--bg-primary);
+      box-shadow: 0 0 0 2px var(--accent);
     }
-
-    .skill-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.85rem;
+    .timeline-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;
     }
+    .timeline-title { font-size: 1.05rem; font-weight: 600; }
+    .timeline-subtitle { font-size: 0.85rem; color: var(--text-secondary); }
+    .timeline-date { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; }
 
+    /* Skills */
+    .skills-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .skill-item { display: flex; flex-direction: column; gap: 0.4rem; }
+    .skill-label { display: flex; justify-content: space-between; font-size: 0.85rem; }
     .skill-label span:first-child { color: var(--text-primary); }
     .skill-label span:last-child { color: var(--text-muted); font-size: 0.8rem; }
-
-    .skill-bar {
-      height: 6px;
-      background: var(--progress-bg);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-
+    .skill-bar { height: 6px; background: var(--progress-bg); border-radius: 3px; overflow: hidden; }
     .skill-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
-      border-radius: 3px;
-      width: 0;
-      transition: width 1.2s ease;
+      height: 100%; background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+      border-radius: 3px; width: 0; transition: width 1.2s ease;
     }
-
     .skill-fill.animate { width: var(--level); }
 
+    /* Radar Chart */
+    .radar-wrapper {
+      display: flex; justify-content: center; margin-bottom: 1.5rem;
+    }
+    #radarChart { max-width: 320px; width: 100%; }
+
     /* Languages */
-    .lang-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 1rem;
-    }
-
+    .lang-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
     .lang-item {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      padding: 0.8rem;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
+      display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem;
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
     }
-
     .lang-icon { font-size: 1.5rem; }
-
     .lang-info h4 { font-size: 0.9rem; font-weight: 500; }
     .lang-info p { font-size: 0.8rem; color: var(--text-muted); }
 
     /* Awards */
     .award-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.7rem 0;
-      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.7rem 0; border-bottom: 1px solid var(--border);
     }
     .award-item:last-child { border-bottom: none; }
     .award-name { font-size: 0.9rem; }
     .award-year { font-size: 0.8rem; color: var(--text-muted); }
 
-    /* Activities & Hobbies */
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-
+    /* Grid */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .activity-item, .hobby-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.8rem;
-      padding: 1rem;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
+      display: flex; align-items: flex-start; gap: 0.8rem; padding: 1rem;
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
     }
-
     .activity-icon, .hobby-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 0.1rem; }
-
     .activity-info h4, .hobby-info h4 { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.2rem; }
     .activity-info p, .hobby-info p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
 
     /* Print */
     @media print {
       body { background: #fff; color: #222; }
-      .bg-gradient, .topbar { display: none; }
-      .card { background: #f9f9f9; border-color: #ddd; box-shadow: none; }
+      #particleCanvas, .topbar, .side-nav { display: none; }
+      .card, .timeline-item { background: #f9f9f9; border-color: #ddd; box-shadow: none; }
       .hero h1 { -webkit-text-fill-color: #222; background: none; }
       .tag { background: #eee; border-color: #ccc; color: #555; }
       .reveal { opacity: 1; transform: none; }
-      .card-desc { max-height: none; opacity: 1; }
+      .card-desc, .timeline-desc { max-height: none; opacity: 1; }
       .skill-fill { width: var(--level) !important; }
-      .section.collapsed .section-body { display: block; }
+      .timeline::before { background: #ccc; }
+      .timeline-item::before { background: #888; border-color: #fff; box-shadow: none; }
     }
 
     /* Responsive */
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
+      .side-nav { display: none; }
       .container { padding: 4rem 1rem 2rem; }
       .hero { padding: 2rem 1rem; }
       .hero h1 { font-size: 1.7rem; }
-      .card { padding: 1.2rem; }
+      .card, .timeline-item { padding: 1.2rem; }
       .skills-grid { grid-template-columns: 1fr; }
       .grid-2 { grid-template-columns: 1fr; }
       .lang-grid { grid-template-columns: 1fr; }
@@ -437,7 +315,7 @@
   </style>
 </head>
 <body>
-  <div class="bg-gradient"></div>
+  <canvas id="particleCanvas"></canvas>
 
   <div class="topbar">
     <button id="themeToggle" title="切换主题">🌓</button>
@@ -445,18 +323,27 @@
     <button id="printBtn" title="导出 PDF">📄</button>
   </div>
 
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-hero" data-section="sec-hero"><span class="dot"></span><span class="label">顶部</span></a>
+    <a href="#sec-edu" data-section="sec-edu"><span class="dot"></span><span class="label">教育</span></a>
+    <a href="#sec-work" data-section="sec-work"><span class="dot"></span><span class="label">工作</span></a>
+    <a href="#sec-skills" data-section="sec-skills"><span class="dot"></span><span class="label">技能</span></a>
+    <a href="#sec-projects" data-section="sec-projects"><span class="dot"></span><span class="label">项目</span></a>
+    <a href="#sec-certs" data-section="sec-certs"><span class="dot"></span><span class="label">证书</span></a>
+    <a href="#sec-langs" data-section="sec-langs"><span class="dot"></span><span class="label">语言</span></a>
+    <a href="#sec-awards" data-section="sec-awards"><span class="dot"></span><span class="label">奖项</span></a>
+    <a href="#sec-activities" data-section="sec-activities"><span class="dot"></span><span class="label">活动</span></a>
+    <a href="#sec-hobbies" data-section="sec-hobbies"><span class="dot"></span><span class="label">爱好</span></a>
+  </nav>
+
   <div class="container">
 
     <!-- Hero -->
-    <section class="hero reveal">
+    <section class="hero reveal" id="sec-hero">
       <div class="avatar">👨‍💻</div>
       <h1>你的名字</h1>
       <p class="tagline">高级前端工程师 / 全栈开发者</p>
-      <p class="bio">
-        热爱技术，专注于前端工程化与用户体验优化。<br>
-        5 年互联网大厂经验，主导过多个亿级流量项目的架构设计。<br>
-        开源爱好者，持续学习，乐于分享。
-      </p>
+      <p class="bio" id="typewriter"></p>
       <div class="contact-row">
         <span class="contact-item">📱 138-0000-0000</span>
         <span class="contact-item">✉️ <a href="mailto:your@email.com">your@email.com</a></span>
@@ -466,142 +353,142 @@
     </section>
 
     <!-- 教育背景 -->
-    <section class="section reveal" data-section="edu">
-      <div class="section-header" onclick="toggleSection('edu')">
+    <section class="section reveal" id="sec-edu" data-nav="sec-edu">
+      <div class="section-header" onclick="toggleSection(this.parentElement)">
         <div class="section-title">教育背景</div>
         <span class="toggle-icon">▼</span>
       </div>
       <div class="section-body">
-        <div class="card">
-          <div class="card-header">
-            <div>
-              <div class="card-title">北京大学</div>
-              <div class="card-subtitle">计算机科学与技术 · 硕士</div>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-header">
+              <div>
+                <div class="timeline-title">北京大学</div>
+                <div class="timeline-subtitle">计算机科学与技术 · 硕士</div>
+              </div>
+              <div class="timeline-date">2018.09 - 2021.06</div>
             </div>
-            <div class="card-date">2018.09 - 2021.06</div>
-          </div>
-          <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
-          <div class="card-desc">
-            <ul>
-              <li>GPA: 3.8/4.0，专业排名前 5%</li>
-              <li>研究方向：分布式系统与微服务架构</li>
-              <li>发表 SCI 论文 2 篇，核心期刊 1 篇</li>
-              <li>国家奖学金获得者（2019、2020 连续两年）</li>
-              <li>担任 ACM 竞赛队队长，带队获区域赛金牌</li>
-            </ul>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header">
-            <div>
-              <div class="card-title">武汉大学</div>
-              <div class="card-subtitle">软件工程 · 学士</div>
+            <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
+            <div class="card-desc">
+              <ul>
+                <li>GPA: 3.8/4.0，专业排名前 5%</li>
+                <li>研究方向：分布式系统与微服务架构</li>
+                <li>发表 SCI 论文 2 篇，核心期刊 1 篇</li>
+                <li>国家奖学金获得者（2019、2020 连续两年）</li>
+                <li>担任 ACM 竞赛队队长，带队获区域赛金牌</li>
+              </ul>
             </div>
-            <div class="card-date">2014.09 - 2018.06</div>
           </div>
-          <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
-          <div class="card-desc">
-            <ul>
-              <li>GPA: 3.6/4.0，优秀毕业设计</li>
-              <li>校级优秀学生干部，连续 3 年获甲等奖学金</li>
-              <li>辅修金融学，获经济学学士双学位</li>
-            </ul>
+          <div class="timeline-item">
+            <div class="timeline-header">
+              <div>
+                <div class="timeline-title">武汉大学</div>
+                <div class="timeline-subtitle">软件工程 · 学士</div>
+              </div>
+              <div class="timeline-date">2014.09 - 2018.06</div>
+            </div>
+            <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
+            <div class="card-desc">
+              <ul>
+                <li>GPA: 3.6/4.0，优秀毕业设计</li>
+                <li>校级优秀学生干部，连续 3 年获甲等奖学金</li>
+                <li>辅修金融学，获经济学学士双学位</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- 工作经历 -->
-    <section class="section reveal" data-section="work">
-      <div class="section-header" onclick="toggleSection('work')">
+    <section class="section reveal" id="sec-work" data-nav="sec-work">
+      <div class="section-header" onclick="toggleSection(this.parentElement)">
         <div class="section-title">工作经历</div>
         <span class="toggle-icon">▼</span>
       </div>
       <div class="section-body">
-        <div class="card">
-          <div class="card-header">
-            <div>
-              <div class="card-title">字节跳动</div>
-              <div class="card-subtitle">高级前端工程师 · 技术 Leader</div>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-header">
+              <div>
+                <div class="timeline-title">字节跳动</div>
+                <div class="timeline-subtitle">高级前端工程师 · 技术 Leader</div>
+              </div>
+              <div class="timeline-date">2022.03 - 至今</div>
             </div>
-            <div class="card-date">2022.03 - 至今</div>
-          </div>
-          <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
-          <div class="card-desc">
-            <ul>
-              <li>负责抖音电商核心交易链路的前端架构设计与性能优化</li>
-              <li>主导微前端架构升级，将页面加载性能提升 40%，首屏时间从 2.5s 降至 1.5s</li>
-              <li>搭建前端监控体系（异常 + 性能 + 用户行为），实现线上问题 5 分钟内发现与定位</li>
-              <li>带领 5 人小组完成直播间购物车重构，转化率提升 12%，GMV 增长 8%</li>
-              <li>推动团队 TypeScript 全面落地，编写技术文档 30+ 篇，组织内部分享 10+ 次</li>
-              <li>获年度优秀员工（Top 10%），晋升答辩通过</li>
-            </ul>
-          </div>
-          <div class="tags">
-            <span class="tag">React</span>
-            <span class="tag">TypeScript</span>
-            <span class="tag">微前端</span>
-            <span class="tag">性能优化</span>
-            <span class="tag">团队管理</span>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header">
-            <div>
-              <div class="card-title">阿里巴巴</div>
-              <div class="card-subtitle">前端工程师 · P6</div>
+            <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
+            <div class="card-desc">
+              <ul>
+                <li>负责抖音电商核心交易链路的前端架构设计与性能优化</li>
+                <li>主导微前端架构升级，页面加载性能提升 40%，首屏从 2.5s 降至 1.5s</li>
+                <li>搭建前端监控体系，实现线上问题 5 分钟内发现与定位</li>
+                <li>带领 5 人小组完成直播间购物车重构，转化率提升 12%</li>
+                <li>推动 TypeScript 全面落地，编写技术文档 30+ 篇</li>
+                <li>获年度优秀员工（Top 10%），晋升答辩通过</li>
+              </ul>
             </div>
-            <div class="card-date">2021.07 - 2022.02</div>
-          </div>
-          <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
-          <div class="card-desc">
-            <ul>
-              <li>参与淘宝首页改版，负责模块化组件库建设，支撑 200+ 运营页面</li>
-              <li>开发内部低代码搭建平台，支持运营人员自主配置页面，效率提升 60%</li>
-              <li>优化首屏渲染速度，FCP 从 2.8s 降至 1.2s，LCP 降低 45%</li>
-              <li>参与双 11 大促保障，确保亿级流量下零故障</li>
-            </ul>
-          </div>
-          <div class="tags">
-            <span class="tag">Vue 3</span>
-            <span class="tag">Node.js</span>
-            <span class="tag">Webpack</span>
-            <span class="tag">低代码</span>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header">
-            <div>
-              <div class="card-title">美团</div>
-              <div class="card-subtitle">前端实习生</div>
+            <div class="tags">
+              <span class="tag">React</span><span class="tag">TypeScript</span>
+              <span class="tag">微前端</span><span class="tag">性能优化</span><span class="tag">团队管理</span>
             </div>
-            <div class="card-date">2020.06 - 2020.12</div>
           </div>
-          <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
-          <div class="card-desc">
-            <ul>
-              <li>参与外卖商家端后台系统开发，负责订单管理模块</li>
-              <li>封装通用表格组件，被 3 个业务线复用</li>
-              <li>编写自动化测试用例 50+，覆盖率提升至 85%</li>
-            </ul>
+          <div class="timeline-item">
+            <div class="timeline-header">
+              <div>
+                <div class="timeline-title">阿里巴巴</div>
+                <div class="timeline-subtitle">前端工程师 · P6</div>
+              </div>
+              <div class="timeline-date">2021.07 - 2022.02</div>
+            </div>
+            <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
+            <div class="card-desc">
+              <ul>
+                <li>参与淘宝首页改版，负责模块化组件库建设，支撑 200+ 运营页面</li>
+                <li>开发内部低代码搭建平台，运营效率提升 60%</li>
+                <li>优化首屏渲染，FCP 从 2.8s 降至 1.2s，LCP 降低 45%</li>
+                <li>参与双 11 大促保障，亿级流量下零故障</li>
+              </ul>
+            </div>
+            <div class="tags">
+              <span class="tag">Vue 3</span><span class="tag">Node.js</span>
+              <span class="tag">Webpack</span><span class="tag">低代码</span>
+            </div>
           </div>
-          <div class="tags">
-            <span class="tag">React</span>
-            <span class="tag">Ant Design</span>
-            <span class="tag">Jest</span>
+          <div class="timeline-item">
+            <div class="timeline-header">
+              <div>
+                <div class="timeline-title">美团</div>
+                <div class="timeline-subtitle">前端实习生</div>
+              </div>
+              <div class="timeline-date">2020.06 - 2020.12</div>
+            </div>
+            <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
+            <div class="card-desc">
+              <ul>
+                <li>参与外卖商家端后台系统开发，负责订单管理模块</li>
+                <li>封装通用表格组件，被 3 个业务线复用</li>
+                <li>编写自动化测试用例 50+，覆盖率提升至 85%</li>
+              </ul>
+            </div>
+            <div class="tags">
+              <span class="tag">React</span><span class="tag">Ant Design</span><span class="tag">Jest</span>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- 技能清单 -->
-    <section class="section reveal" data-section="skills">
-      <div class="section-header" onclick="toggleSection('skills')">
+    <section class="section reveal" id="sec-skills" data-nav="sec-skills">
+      <div class="section-header" onclick="toggleSection(this.parentElement)">
         <div class="section-title">技能清单</div>
         <span class="toggle-icon">▼</span>
       </div>
       <div class="section-body">
         <div class="card">
+          <div class="radar-wrapper">
+            <canvas id="radarChart" width="320" height="320"></canvas>
+          </div>
           <div class="skills-grid">
             <div class="skill-item">
               <div class="skill-label"><span>React / Next.js</span><span>95%</span></div>
@@ -641,252 +528,152 @@
     </section>
 
     <!-- 项目经历 -->
-    <section class="section reveal" data-section="projects">
-      <div class="section-header" onclick="toggleSection('projects')">
+    <section class="section reveal" id="sec-projects" data-nav="sec-projects">
+      <div class="section-header" onclick="toggleSection(this.parentElement)">
         <div class="section-title">项目经历</div>
         <span class="toggle-icon">▼</span>
       </div>
       <div class="section-body">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">抖音电商交易中台</div>
-            <div class="card-date">2023.01 - 2023.12</div>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-header">
+              <div class="timeline-title">抖音电商交易中台</div>
+              <div class="timeline-date">2023.01 - 2023.12</div>
+            </div>
+            <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
+            <div class="card-desc">
+              <ul>
+                <li>统一电商交易链路的前端架构，支撑百亿级 GMV 交易场景</li>
+                <li>设计插件化交易组件体系，新业务接入周期从 2 周缩短至 2 天</li>
+                <li>实现按需加载与骨架屏方案，核心页面 LCP 降低 35%</li>
+              </ul>
+            </div>
+            <div class="tags">
+              <span class="tag">React</span><span class="tag">TypeScript</span>
+              <span class="tag">微前端</span><span class="tag">性能优化</span>
+            </div>
           </div>
-          <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
-          <div class="card-desc">
-            <ul>
-              <li>统一电商交易链路的前端架构，支撑百亿级 GMV 交易场景</li>
-              <li>设计插件化交易组件体系，新业务接入周期从 2 周缩短至 2 天</li>
-              <li>实现按需加载与骨架屏方案，核心页面 LCP 降低 35%</li>
-              <li>主导技术方案评审，输出架构设计文档 15 篇</li>
-            </ul>
+          <div class="timeline-item">
+            <div class="timeline-header">
+              <div class="timeline-title">前端性能监控平台</div>
+              <div class="timeline-date">2022.06 - 2022.12</div>
+            </div>
+            <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
+            <div class="card-desc">
+              <ul>
+                <li>从零搭建前端监控系统，覆盖异常、性能、用户行为追踪</li>
+                <li>支持自定义报警规则，日均处理 5000 万条数据</li>
+                <li>获部门创新奖，方案被推广至集团 3 个 BU</li>
+              </ul>
+            </div>
+            <div class="tags">
+              <span class="tag">Node.js</span><span class="tag">Kafka</span>
+              <span class="tag">ClickHouse</span><span class="tag">React</span>
+            </div>
           </div>
-          <div class="tags">
-            <span class="tag">React</span>
-            <span class="tag">TypeScript</span>
-            <span class="tag">微前端</span>
-            <span class="tag">性能优化</span>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">前端性能监控平台</div>
-            <div class="card-date">2022.06 - 2022.12</div>
-          </div>
-          <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
-          <div class="card-desc">
-            <ul>
-              <li>从零搭建前端监控系统，覆盖异常采集、性能采集、用户行为追踪</li>
-              <li>支持自定义报警规则，实现线上问题自动发现与分级通知</li>
-              <li>日均处理 5000 万条数据，报警准确率达 95%</li>
-              <li>获部门创新奖，方案被推广至集团 3 个 BU</li>
-            </ul>
-          </div>
-          <div class="tags">
-            <span class="tag">Node.js</span>
-            <span class="tag">Kafka</span>
-            <span class="tag">ClickHouse</span>
-            <span class="tag">React</span>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">开源组件库 AwesomeUI</div>
-            <div class="card-date">2021.09 - 至今</div>
-          </div>
-          <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
-          <div class="card-desc">
-            <ul>
-              <li>个人开源项目，基于 React + TypeScript 的企业级 UI 组件库</li>
-              <li>GitHub 2.8k Stars，npm 周下载量 5000+</li>
-              <li>包含 60+ 组件，完善的文档与示例，支持主题定制</li>
-              <li>获 2023 年度最受欢迎开源项目提名</li>
-            </ul>
-          </div>
-          <div class="tags">
-            <span class="tag">React</span>
-            <span class="tag">TypeScript</span>
-            <span class="tag">Storybook</span>
-            <span class="tag">Rollup</span>
+          <div class="timeline-item">
+            <div class="timeline-header">
+              <div class="timeline-title">开源组件库 AwesomeUI</div>
+              <div class="timeline-date">2021.09 - 至今</div>
+            </div>
+            <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
+            <div class="card-desc">
+              <ul>
+                <li>GitHub 2.8k Stars，npm 周下载量 5000+</li>
+                <li>包含 60+ 组件，完善的文档与示例</li>
+                <li>获 2023 年度最受欢迎开源项目提名</li>
+              </ul>
+            </div>
+            <div class="tags">
+              <span class="tag">React</span><span class="tag">TypeScript</span>
+              <span class="tag">Storybook</span><span class="tag">Rollup</span>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- 资格证书 -->
-    <section class="section reveal" data-section="certs">
-      <div class="section-header" onclick="toggleSection('certs')">
+    <section class="section reveal" id="sec-certs" data-nav="sec-certs">
+      <div class="section-header" onclick="toggleSection(this.parentElement)">
         <div class="section-title">资格证书</div>
         <span class="toggle-icon">▼</span>
       </div>
       <div class="section-body">
         <div class="card">
-          <div class="award-item">
-            <span class="award-name">AWS Certified Solutions Architect</span>
-            <span class="award-year">2023</span>
-          </div>
-          <div class="award-item">
-            <span class="award-name">PMP 项目管理专业人士认证</span>
-            <span class="award-year">2022</span>
-          </div>
-          <div class="award-item">
-            <span class="award-name">阿里云高级工程师认证</span>
-            <span class="award-year">2021</span>
-          </div>
-          <div class="award-item">
-            <span class="award-name">软件设计师（中级）</span>
-            <span class="award-year">2019</span>
-          </div>
+          <div class="award-item"><span class="award-name">AWS Certified Solutions Architect</span><span class="award-year">2023</span></div>
+          <div class="award-item"><span class="award-name">PMP 项目管理专业人士认证</span><span class="award-year">2022</span></div>
+          <div class="award-item"><span class="award-name">阿里云高级工程师认证</span><span class="award-year">2021</span></div>
+          <div class="award-item"><span class="award-name">软件设计师（中级）</span><span class="award-year">2019</span></div>
         </div>
       </div>
     </section>
 
     <!-- 语言能力 -->
-    <section class="section reveal" data-section="langs">
-      <div class="section-header" onclick="toggleSection('langs')">
+    <section class="section reveal" id="sec-langs" data-nav="sec-langs">
+      <div class="section-header" onclick="toggleSection(this.parentElement)">
         <div class="section-title">语言能力</div>
         <span class="toggle-icon">▼</span>
       </div>
       <div class="section-body">
         <div class="card">
           <div class="lang-grid">
-            <div class="lang-item">
-              <span class="lang-icon">🇨🇳</span>
-              <div class="lang-info">
-                <h4>中文</h4>
-                <p>母语</p>
-              </div>
-            </div>
-            <div class="lang-item">
-              <span class="lang-icon">🇬🇧</span>
-              <div class="lang-info">
-                <h4>英语</h4>
-                <p>流利（IELTS 7.5 / CET-6 620）</p>
-              </div>
-            </div>
-            <div class="lang-item">
-              <span class="lang-icon">🇯🇵</span>
-              <div class="lang-info">
-                <h4>日语</h4>
-                <p>基础会话（N3）</p>
-              </div>
-            </div>
+            <div class="lang-item"><span class="lang-icon">🇨🇳</span><div class="lang-info"><h4>中文</h4><p>母语</p></div></div>
+            <div class="lang-item"><span class="lang-icon">🇬🇧</span><div class="lang-info"><h4>英语</h4><p>流利（IELTS 7.5）</p></div></div>
+            <div class="lang-item"><span class="lang-icon">🇯🇵</span><div class="lang-info"><h4>日语</h4><p>基础会话（N3）</p></div></div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- 荣誉奖项 -->
-    <section class="section reveal" data-section="awards">
-      <div class="section-header" onclick="toggleSection('awards')">
+    <section class="section reveal" id="sec-awards" data-nav="sec-awards">
+      <div class="section-header" onclick="toggleSection(this.parentElement)">
         <div class="section-title">荣誉奖项</div>
         <span class="toggle-icon">▼</span>
       </div>
       <div class="section-body">
         <div class="card">
-          <div class="award-item">
-            <span class="award-name">字节跳动年度优秀员工（Top 10%）</span>
-            <span class="award-year">2023</span>
-          </div>
-          <div class="award-item">
-            <span class="award-name">ACM-ICPC 亚洲区域赛金牌</span>
-            <span class="award-year">2017</span>
-          </div>
-          <div class="award-item">
-            <span class="award-name">北京大学优秀毕业论文</span>
-            <span class="award-year">2021</span>
-          </div>
-          <div class="award-item">
-            <span class="award-name">Google Summer of Code 贡献者</span>
-            <span class="award-year">2019</span>
-          </div>
-          <div class="award-item">
-            <span class="award-name">国家奖学金（连续两年）</span>
-            <span class="award-year">2019-2020</span>
-          </div>
+          <div class="award-item"><span class="award-name">字节跳动年度优秀员工（Top 10%）</span><span class="award-year">2023</span></div>
+          <div class="award-item"><span class="award-name">ACM-ICPC 亚洲区域赛金牌</span><span class="award-year">2017</span></div>
+          <div class="award-item"><span class="award-name">北京大学优秀毕业论文</span><span class="award-year">2021</span></div>
+          <div class="award-item"><span class="award-name">Google Summer of Code 贡献者</span><span class="award-year">2019</span></div>
+          <div class="award-item"><span class="award-name">国家奖学金（连续两年）</span><span class="award-year">2019-2020</span></div>
         </div>
       </div>
     </section>
 
     <!-- 社会活动 -->
-    <section class="section reveal" data-section="activities">
-      <div class="section-header" onclick="toggleSection('activities')">
+    <section class="section reveal" id="sec-activities" data-nav="sec-activities">
+      <div class="section-header" onclick="toggleSection(this.parentElement)">
         <div class="section-title">社会活动</div>
         <span class="toggle-icon">▼</span>
       </div>
       <div class="section-body">
         <div class="card">
           <div class="grid-2">
-            <div class="activity-item">
-              <span class="activity-icon">🎤</span>
-              <div class="activity-info">
-                <h4>技术博客作者</h4>
-                <p>在掘金、知乎发表技术文章 50+ 篇，累计阅读量 100 万+，关注者 5000+</p>
-              </div>
-            </div>
-            <div class="activity-item">
-              <span class="activity-icon">🏫</span>
-              <div class="activity-info">
-                <h4>开源社区 Maintainer</h4>
-                <p>维护 AwesomeUI 开源项目，审阅 PR 200+，培养新人贡献者 30+</p>
-              </div>
-            </div>
-            <div class="activity-item">
-              <span class="activity-icon">🤝</span>
-              <div class="activity-info">
-                <h4>技术大会演讲者</h4>
-                <p>QCon、GMTC 等大会分享 5 次，主题涵盖微前端、性能优化、工程化</p>
-              </div>
-            </div>
-            <div class="activity-item">
-              <span class="activity-icon">💡</span>
-              <div class="activity-info">
-                <h4>内推达人</h4>
-                <p>累计内推 50+ 人，成功入职 20+，获公司内推白金勋章</p>
-              </div>
-            </div>
+            <div class="activity-item"><span class="activity-icon">🎤</span><div class="activity-info"><h4>技术博客作者</h4><p>掘金、知乎发表文章 50+ 篇，累计阅读量 100 万+</p></div></div>
+            <div class="activity-item"><span class="activity-icon">🏫</span><div class="activity-info"><h4>开源社区 Maintainer</h4><p>维护 AwesomeUI，审阅 PR 200+，培养新人 30+</p></div></div>
+            <div class="activity-item"><span class="activity-icon">🤝</span><div class="activity-info"><h4>技术大会演讲者</h4><p>QCon、GMTC 等大会分享 5 次</p></div></div>
+            <div class="activity-item"><span class="activity-icon">💡</span><div class="activity-info"><h4>内推达人</h4><p>累计内推 50+ 人，成功入职 20+</p></div></div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- 兴趣爱好 -->
-    <section class="section reveal" data-section="hobbies">
-      <div class="section-header" onclick="toggleSection('hobbies')">
+    <section class="section reveal" id="sec-hobbies" data-nav="sec-hobbies">
+      <div class="section-header" onclick="toggleSection(this.parentElement)">
         <div class="section-title">兴趣爱好</div>
         <span class="toggle-icon">▼</span>
       </div>
       <div class="section-body">
         <div class="card">
           <div class="grid-2">
-            <div class="hobby-item">
-              <span class="hobby-icon">🏃</span>
-              <div class="hobby-info">
-                <h4>跑步 / 马拉松</h4>
-                <p>完成 3 次全马，最好成绩 3 小时 45 分</p>
-              </div>
-            </div>
-            <div class="hobby-item">
-              <span class="hobby-icon">📷</span>
-              <div class="hobby-info">
-                <h4>摄影</h4>
-                <p>街拍与风光摄影，500px 签约摄影师</p>
-              </div>
-            </div>
-            <div class="hobby-item">
-              <span class="hobby-icon">📚</span>
-              <div class="hobby-info">
-                <h4>阅读</h4>
-                <p>年均阅读 30+ 本，偏好技术与人文类</p>
-              </div>
-            </div>
-            <div class="hobby-item">
-              <span class="hobby-icon">🎮</span>
-              <div class="hobby-info">
-                <h4>独立游戏</h4>
-                <p>关注独立游戏开发，自学 Unity 基础</p>
-              </div>
-            </div>
+            <div class="hobby-item"><span class="hobby-icon">🏃</span><div class="hobby-info"><h4>跑步 / 马拉松</h4><p>完成 3 次全马，最好成绩 3h45m</p></div></div>
+            <div class="hobby-item"><span class="hobby-icon">📷</span><div class="hobby-info"><h4>摄影</h4><p>街拍与风光，500px 签约摄影师</p></div></div>
+            <div class="hobby-item"><span class="hobby-icon">📚</span><div class="hobby-info"><h4>阅读</h4><p>年均 30+ 本，偏好技术与人文</p></div></div>
+            <div class="hobby-item"><span class="hobby-icon">🎮</span><div class="hobby-info"><h4>独立游戏</h4><p>关注独立游戏，自学 Unity 基础</p></div></div>
           </div>
         </div>
       </div>
@@ -895,43 +682,148 @@
   </div>
 
   <script>
-    // Theme Toggle
-    const themeToggle = document.getElementById('themeToggle');
-    const html = document.documentElement;
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    if (savedTheme === 'light') html.setAttribute('data-theme', 'light');
+    // ========== Particle Background ==========
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let mouse = { x: -1000, y: -1000 };
 
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 0.5;
+        this.speedX = (Math.random() - 0.5) * 0.5;
+        this.speedY = (Math.random() - 0.5) * 0.5;
+        this.opacity = Math.random() * 0.5 + 0.1;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        const dx = mouse.x - this.x;
+        const dy = mouse.y - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 150) {
+          this.x -= dx * 0.01;
+          this.y -= dy * 0.01;
+          this.opacity = Math.min(this.opacity + 0.02, 0.8);
+        }
+        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+          this.reset();
+        }
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(108, 99, 255, ${this.opacity})`;
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 80; i++) particles.push(new Particle());
+
+    function connectParticles() {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(108, 99, 255, ${0.1 * (1 - dist / 120)})`;
+            ctx.lineWidth = 0.5;
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => { p.update(); p.draw(); });
+      connectParticles();
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+    // ========== Typewriter ==========
+    const typeText = "热爱技术，专注于前端工程化与用户体验优化。\n5 年互联网大厂经验，主导过多个亿级流量项目。\n开源爱好者，持续学习，乐于分享。";
+    const typeEl = document.getElementById('typewriter');
+    let charIndex = 0;
+    const cursor = document.createElement('span');
+    cursor.className = 'typewriter-cursor';
+    typeEl.appendChild(cursor);
+
+    function typeChar() {
+      if (charIndex < typeText.length) {
+        if (typeText[charIndex] === '\n') {
+          typeEl.insertBefore(document.createElement('br'), cursor);
+        } else {
+          typeEl.insertBefore(document.createTextNode(typeText[charIndex]), cursor);
+        }
+        charIndex++;
+        setTimeout(typeChar, 50 + Math.random() * 40);
+      }
+    }
+    setTimeout(typeChar, 800);
+
+    // ========== Theme ==========
+    const themeToggle = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') document.documentElement.setAttribute('data-theme', 'light');
     themeToggle.addEventListener('click', () => {
-      const isLight = html.getAttribute('data-theme') === 'light';
-      html.setAttribute('data-theme', isLight ? '' : 'light');
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      document.documentElement.setAttribute('data-theme', isLight ? '' : 'light');
       localStorage.setItem('theme', isLight ? 'dark' : 'light');
-      themeToggle.textContent = isLight ? '🌓' : '🌓';
+      drawRadar();
     });
 
-    // Scroll Reveal
+    // ========== Scroll Reveal ==========
     const revealObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible');
-          // Animate skill bars
-          entry.target.querySelectorAll('.skill-fill').forEach(bar => {
-            bar.classList.add('animate');
-          });
+          entry.target.querySelectorAll('.skill-fill').forEach(bar => bar.classList.add('animate'));
         }
       });
     }, { threshold: 0.1 });
-
     document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-    // Section Toggle
-    function toggleSection(id) {
-      const section = document.querySelector(`[data-section="${id}"]`);
+    // ========== Side Nav ==========
+    const navLinks = document.querySelectorAll('.side-nav a');
+    const sections = document.querySelectorAll('[data-nav]');
+    const navObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          navLinks.forEach(link => {
+            link.classList.toggle('active', link.getAttribute('data-section') === id);
+          });
+        }
+      });
+    }, { threshold: 0.3 });
+    sections.forEach(sec => navObserver.observe(sec));
+
+    // ========== Toggle ==========
+    function toggleSection(section) {
       section.classList.toggle('collapsed');
     }
-
-    // Card Expand/Collapse
     function toggleCard(btn) {
-      const card = btn.closest('.card');
+      const card = btn.closest('.card, .timeline-item');
       const isExpanded = card.classList.contains('expanded');
       card.classList.toggle('expanded');
       btn.textContent = isExpanded ? '展开详情 ▾' : '收起 ▴';
@@ -942,7 +834,7 @@
     let allExpanded = false;
     expandAllBtn.addEventListener('click', () => {
       allExpanded = !allExpanded;
-      document.querySelectorAll('.card').forEach(card => {
+      document.querySelectorAll('.card, .timeline-item').forEach(card => {
         if (allExpanded) {
           card.classList.add('expanded');
           const btn = card.querySelector('.expand-btn');
@@ -956,10 +848,90 @@
       document.querySelectorAll('.section.collapsed').forEach(s => s.classList.remove('collapsed'));
     });
 
-    // Print / PDF
-    document.getElementById('printBtn').addEventListener('click', () => {
-      window.print();
-    });
+    // Print
+    document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+    // ========== Radar Chart ==========
+    function drawRadar() {
+      const c = document.getElementById('radarChart');
+      if (!c) return;
+      const cx = c.getContext('2d');
+      const w = c.width, h = c.height;
+      const centerX = w / 2, centerY = h / 2;
+      const radius = Math.min(w, h) / 2 - 40;
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+
+      cx.clearRect(0, 0, w, h);
+
+      const labels = ['React', 'TypeScript', 'Vue', 'Node.js', 'Python', 'DevOps', '数据库', '工程化'];
+      const values = [95, 90, 85, 80, 75, 70, 78, 88];
+      const n = labels.length;
+      const angleStep = (Math.PI * 2) / n;
+
+      // Grid
+      for (let level = 1; level <= 5; level++) {
+        const r = (radius / 5) * level;
+        cx.beginPath();
+        for (let i = 0; i <= n; i++) {
+          const angle = angleStep * i - Math.PI / 2;
+          const x = centerX + r * Math.cos(angle);
+          const y = centerY + r * Math.sin(angle);
+          i === 0 ? cx.moveTo(x, y) : cx.lineTo(x, y);
+        }
+        cx.closePath();
+        cx.strokeStyle = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)';
+        cx.lineWidth = 1;
+        cx.stroke();
+      }
+
+      // Axes
+      for (let i = 0; i < n; i++) {
+        const angle = angleStep * i - Math.PI / 2;
+        cx.beginPath();
+        cx.moveTo(centerX, centerY);
+        cx.lineTo(centerX + radius * Math.cos(angle), centerY + radius * Math.sin(angle));
+        cx.strokeStyle = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)';
+        cx.stroke();
+      }
+
+      // Data
+      cx.beginPath();
+      for (let i = 0; i <= n; i++) {
+        const idx = i % n;
+        const angle = angleStep * idx - Math.PI / 2;
+        const r = (radius * values[idx]) / 100;
+        const x = centerX + r * Math.cos(angle);
+        const y = centerY + r * Math.sin(angle);
+        i === 0 ? cx.moveTo(x, y) : cx.lineTo(x, y);
+      }
+      cx.closePath();
+      cx.fillStyle = 'rgba(108, 99, 255, 0.2)';
+      cx.fill();
+      cx.strokeStyle = 'rgba(108, 99, 255, 0.8)';
+      cx.lineWidth = 2;
+      cx.stroke();
+
+      // Points & Labels
+      for (let i = 0; i < n; i++) {
+        const angle = angleStep * i - Math.PI / 2;
+        const r = (radius * values[i]) / 100;
+        const x = centerX + r * Math.cos(angle);
+        const y = centerY + r * Math.sin(angle);
+        cx.beginPath();
+        cx.arc(x, y, 4, 0, Math.PI * 2);
+        cx.fillStyle = '#6c63ff';
+        cx.fill();
+
+        const lx = centerX + (radius + 22) * Math.cos(angle);
+        const ly = centerY + (radius + 22) * Math.sin(angle);
+        cx.fillStyle = isLight ? '#333' : '#ccc';
+        cx.font = '11px -apple-system, sans-serif';
+        cx.textAlign = 'center';
+        cx.textBaseline = 'middle';
+        cx.fillText(labels[i], lx, ly);
+      }
+    }
+    setTimeout(drawRadar, 100);
   </script>
 </body>
 </html>
