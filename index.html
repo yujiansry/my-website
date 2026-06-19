@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>个人简历 - 你的名字</title>
+  <style>
+    :root {
+      --bg-primary: #0a0a1a;
+      --bg-card: rgba(255, 255, 255, 0.04);
+      --bg-card-hover: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.15);
+      --text-primary: #f0f0f0;
+      --text-secondary: rgba(255, 255, 255, 0.6);
+      --text-muted: rgba(255, 255, 255, 0.4);
+      --accent: #6c63ff;
+      --accent-light: #8b83ff;
+      --gradient-start: #6c63ff;
+      --gradient-end: #e44dff;
+      --tag-bg: rgba(108, 99, 255, 0.15);
+      --tag-border: rgba(108, 99, 255, 0.3);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .bg-gradient {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(ellipse at 20% 0%, rgba(108, 99, 255, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 100%, rgba(228, 77, 255, 0.08) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+    }
+
+    .section {
+      margin-bottom: 3rem;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 0.6s ease forwards;
+    }
+
+    .section:nth-child(1) { animation-delay: 0.1s; }
+    .section:nth-child(2) { animation-delay: 0.2s; }
+    .section:nth-child(3) { animation-delay: 0.3s; }
+    .section:nth-child(4) { animation-delay: 0.4s; }
+    .section:nth-child(5) { animation-delay: 0.5s; }
+    .section:nth-child(6) { animation-delay: 0.6s; }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--accent-light);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, var(--border), transparent);
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-hover);
+    }
+
+    .card + .card { margin-top: 1rem; }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .card-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .card-date {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .card-desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .card-desc ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .card-desc li {
+      padding: 0.2rem 0;
+      padding-left: 1rem;
+      position: relative;
+    }
+
+    .card-desc li::before {
+      content: '›';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.8rem;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.6rem;
+      background: var(--tag-bg);
+      border: 1px solid var(--tag-border);
+      border-radius: 6px;
+      color: var(--accent-light);
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 3rem 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      margin: 0 auto 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      box-shadow: 0 0 30px rgba(108, 99, 255, 0.3);
+    }
+
+    .hero h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--text-primary), var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero .tagline {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+    }
+
+    .contact-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .contact-row a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .contact-row a:hover { color: var(--accent-light); }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    /* Skills */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .skill-category h4 {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .skill-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+
+    /* Awards */
+    .award-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .award-item:last-child { border-bottom: none; }
+
+    .award-name {
+      font-size: 0.9rem;
+      color: var(--text-primary);
+    }
+
+    .award-year {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Print */
+    @media print {
+      body { background: #fff; color: #222; }
+      .bg-gradient { display: none; }
+      .card { background: #f9f9f9; border-color: #ddd; }
+      .hero h1 { -webkit-text-fill-color: #222; background: none; }
+      .tag { background: #eee; border-color: #ccc; color: #555; }
+      .section { animation: none; opacity: 1; transform: none; }
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .container { padding: 2rem 1rem; }
+      .hero { padding: 2rem 1rem; }
+      .hero h1 { font-size: 1.6rem; }
+      .card { padding: 1.2rem; }
+      .skills-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-gradient"></div>
+  <div class="container">
+
+    <section class="hero section">
+      <div class="avatar">👨‍💻</div>
+      <h1>你的名字</h1>
+      <p class="tagline">高级前端工程师 / 全栈开发者</p>
+      <div class="contact-row">
+        <span class="contact-item">📱 138-0000-0000</span>
+        <span class="contact-item">✉️ <a href="mailto:your@email.com">your@email.com</a></span>
+        <span class="contact-item">🔗 <a href="https://github.com/yourusername" target="_blank">GitHub</a></span>
+        <span class="contact-item">📍 北京</span>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">教育背景</div>
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">北京大学</div>
+            <div class="card-subtitle">计算机科学与技术 · 硕士</div>
+          </div>
+          <div class="card-date">2018.09 - 2021.06</div>
+        </div>
+        <div class="card-desc">
+          GPA: 3.8/4.0 · 研究方向：分布式系统与微服务架构
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">武汉大学</div>
+            <div class="card-subtitle">软件工程 · 学士</div>
+          </div>
+          <div class="card-date">2014.09 - 2018.06</div>
+        </div>
+        <div class="card-desc">
+          GPA: 3.6/4.0 · 优秀毕业设计
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">工作经历</div>
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">字节跳动</div>
+            <div class="card-subtitle">高级前端工程师</div>
+          </div>
+          <div class="card-date">2022.03 - 至今</div>
+        </div>
+        <div class="card-desc">
+          <ul>
+            <li>负责抖音电商核心交易链路的前端架构设计与性能优化</li>
+            <li>主导微前端架构升级，将页面加载性能提升 40%</li>
+            <li>搭建前端监控体系，实现线上问题 5 分钟内发现与定位</li>
+            <li>带领 5 人小组完成直播间购物车重构，转化率提升 12%</li>
+          </ul>
+        </div>
+        <div class="tags">
+          <span class="tag">React</span>
+          <span class="tag">TypeScript</span>
+          <span class="tag">微前端</span>
+          <span class="tag">性能优化</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">阿里巴巴</div>
+            <div class="card-subtitle">前端工程师</div>
+          </div>
+          <div class="card-date">2021.07 - 2022.02</div>
+        </div>
+        <div class="card-desc">
+          <ul>
+            <li>参与淘宝首页改版，负责模块化组件库建设</li>
+            <li>开发内部搭建平台，支持运营人员自主配置页面</li>
+            <li>优化首屏渲染速度，FCP 从 2.8s 降至 1.2s</li>
+          </ul>
+        </div>
+        <div class="tags">
+          <span class="tag">Vue</span>
+          <span class="tag">Node.js</span>
+          <span class="tag">Webpack</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">技能清单</div>
+      <div class="card">
+        <div class="skills-grid">
+          <div class="skill-category">
+            <h4>前端</h4>
+            <div class="skill-tags">
+              <span class="tag">React</span>
+              <span class="tag">Vue 3</span>
+              <span class="tag">TypeScript</span>
+              <span class="tag">Next.js</span>
+              <span class="tag">Tailwind CSS</span>
+            </div>
+          </div>
+          <div class="skill-category">
+            <h4>后端</h4>
+            <div class="skill-tags">
+              <span class="tag">Node.js</span>
+              <span class="tag">Go</span>
+              <span class="tag">Python</span>
+              <span class="tag">PostgreSQL</span>
+              <span class="tag">Redis</span>
+            </div>
+          </div>
+          <div class="skill-category">
+            <h4>工程化</h4>
+            <div class="skill-tags">
+              <span class="tag">Webpack</span>
+              <span class="tag">Vite</span>
+              <span class="tag">Docker</span>
+              <span class="tag">CI/CD</span>
+              <span class="tag">Git</span>
+            </div>
+          </div>
+          <div class="skill-category">
+            <h4>其他</h4>
+            <div class="skill-tags">
+              <span class="tag">微前端</span>
+              <span class="tag">GraphQL</span>
+              <span class="tag">性能优化</span>
+              <span class="tag">前端监控</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">项目经历</div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">抖音电商交易中台</div>
+          <div class="card-date">2023.01 - 2023.12</div>
+        </div>
+        <div class="card-desc">
+          <ul>
+            <li>统一电商交易链路的前端架构，支撑百亿级 GMV 交易场景</li>
+            <li>设计插件化交易组件体系，新业务接入周期从 2 周缩短至 2 天</li>
+            <li>实现按需加载与骨架屏方案，核心页面 LCP 降低 35%</li>
+          </ul>
+        </div>
+        <div class="tags">
+          <span class="tag">React</span>
+          <span class="tag">TypeScript</span>
+          <span class="tag">微前端</span>
+          <span class="tag">性能优化</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">前端性能监控平台</div>
+          <div class="card-date">2022.06 - 2022.12</div>
+        </div>
+        <div class="card-desc">
+          <ul>
+            <li>从零搭建前端监控系统，覆盖异常采集、性能采集、用户行为追踪</li>
+            <li>支持自定义报警规则，实现线上问题自动发现与分级通知</li>
+            <li>日均处理 5000 万条数据，报警准确率达 95%</li>
+          </ul>
+        </div>
+        <div class="tags">
+          <span class="tag">Node.js</span>
+          <span class="tag">Kafka</span>
+          <span class="tag">ClickHouse</span>
+          <span class="tag">React</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">荣誉奖项</div>
+      <div class="card">
+        <div class="award-item">
+          <span class="award-name">字节跳动年度优秀员工</span>
+          <span class="award-year">2023</span>
+        </div>
+        <div class="award-item">
+          <span class="award-name">ACM-ICPC 亚洲区域赛金牌</span>
+          <span class="award-year">2017</span>
+        </div>
+        <div class="award-item">
+          <span class="award-name">北京大学优秀毕业论文</span>
+          <span class="award-year">2021</span>
+        </div>
+        <div class="award-item">
+          <span class="award-name">Google Summer of Code 贡献者</span>
+          <span class="award-year">2019</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.animationPlayState = 'running';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.section').forEach(el => {
+      el.style.animationPlayState = 'paused';
+      observer.observe(el);
+    });
+
+    document.querySelector('.hero').style.animationPlayState = 'running';
+  </script>
+</body>
+</html>
