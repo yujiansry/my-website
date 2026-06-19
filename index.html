@@ -7,6 +7,7 @@
   <style>
     :root {
       --bg-primary: #0a0a1a;
+      --bg-secondary: #111128;
       --bg-card: rgba(255, 255, 255, 0.04);
       --bg-card-hover: rgba(255, 255, 255, 0.08);
       --border: rgba(255, 255, 255, 0.08);
@@ -20,10 +21,27 @@
       --gradient-end: #e44dff;
       --tag-bg: rgba(108, 99, 255, 0.15);
       --tag-border: rgba(108, 99, 255, 0.3);
+      --progress-bg: rgba(255, 255, 255, 0.08);
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f5f5f7;
+      --bg-secondary: #ffffff;
+      --bg-card: rgba(0, 0, 0, 0.03);
+      --bg-card-hover: rgba(0, 0, 0, 0.06);
+      --border: rgba(0, 0, 0, 0.08);
+      --border-hover: rgba(0, 0, 0, 0.15);
+      --text-primary: #1d1d1f;
+      --text-secondary: rgba(0, 0, 0, 0.6);
+      --text-muted: rgba(0, 0, 0, 0.4);
+      --tag-bg: rgba(108, 99, 255, 0.1);
+      --tag-border: rgba(108, 99, 255, 0.2);
+      --progress-bg: rgba(0, 0, 0, 0.06);
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     html { scroll-behavior: smooth; }
 
     body {
@@ -32,6 +50,7 @@
       color: var(--text-primary);
       line-height: 1.6;
       min-height: 100vh;
+      transition: background 0.4s, color 0.4s;
     }
 
     .bg-gradient {
@@ -42,6 +61,43 @@
         radial-gradient(ellipse at 80% 100%, rgba(228, 77, 255, 0.08) 0%, transparent 50%);
       pointer-events: none;
       z-index: 0;
+      transition: opacity 0.4s;
+    }
+
+    [data-theme="light"] .bg-gradient { opacity: 0.5; }
+
+    /* Top Bar */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      background: transparent;
+    }
+
+    .topbar button {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      backdrop-filter: blur(10px);
+    }
+
+    .topbar button:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-hover);
+      color: var(--text-primary);
     }
 
     .container {
@@ -49,25 +105,30 @@
       z-index: 1;
       max-width: 900px;
       margin: 0 auto;
-      padding: 3rem 1.5rem;
+      padding: 5rem 1.5rem 3rem;
     }
 
-    .section {
-      margin-bottom: 3rem;
+    /* Scroll Animations */
+    .reveal {
       opacity: 0;
-      transform: translateY(20px);
-      animation: fadeUp 0.6s ease forwards;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
 
-    .section:nth-child(1) { animation-delay: 0.1s; }
-    .section:nth-child(2) { animation-delay: 0.2s; }
-    .section:nth-child(3) { animation-delay: 0.3s; }
-    .section:nth-child(4) { animation-delay: 0.4s; }
-    .section:nth-child(5) { animation-delay: 0.5s; }
-    .section:nth-child(6) { animation-delay: 0.6s; }
+    /* Section */
+    .section { margin-bottom: 3rem; }
 
-    @keyframes fadeUp {
-      to { opacity: 1; transform: translateY(0); }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.2rem;
+      cursor: pointer;
+      user-select: none;
     }
 
     .section-title {
@@ -76,7 +137,6 @@
       text-transform: uppercase;
       letter-spacing: 0.15em;
       color: var(--accent-light);
-      margin-bottom: 1.2rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -89,6 +149,15 @@
       background: linear-gradient(to right, var(--border), transparent);
     }
 
+    .toggle-icon {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      transition: transform 0.3s;
+    }
+
+    .section.collapsed .toggle-icon { transform: rotate(-90deg); }
+    .section.collapsed .section-body { display: none; }
+
     .card {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -100,6 +169,7 @@
     .card:hover {
       background: var(--bg-card-hover);
       border-color: var(--border-hover);
+      box-shadow: var(--shadow);
     }
 
     .card + .card { margin-top: 1rem; }
@@ -113,40 +183,43 @@
       gap: 0.5rem;
     }
 
-    .card-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .card-subtitle {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-    }
-
-    .card-date {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      white-space: nowrap;
-    }
+    .card-title { font-size: 1.1rem; font-weight: 600; }
+    .card-subtitle { font-size: 0.9rem; color: var(--text-secondary); }
+    .card-date { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; }
 
     .card-desc {
       font-size: 0.9rem;
       color: var(--text-secondary);
       line-height: 1.7;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, opacity 0.3s ease;
+      opacity: 0;
     }
 
-    .card-desc ul {
-      list-style: none;
-      padding: 0;
+    .card.expanded .card-desc {
+      max-height: 500px;
+      opacity: 1;
     }
 
+    .expand-btn {
+      background: none;
+      border: none;
+      color: var(--accent-light);
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 0.3rem 0;
+      transition: opacity 0.3s;
+    }
+
+    .expand-btn:hover { opacity: 0.7; }
+
+    .card-desc ul { list-style: none; padding: 0; }
     .card-desc li {
       padding: 0.2rem 0;
       padding-left: 1rem;
       position: relative;
     }
-
     .card-desc li::before {
       content: '›';
       position: absolute;
@@ -171,7 +244,7 @@
       color: var(--accent-light);
     }
 
-    /* Hero Section */
+    /* Hero */
     .hero {
       text-align: center;
       padding: 3rem 2rem;
@@ -179,20 +252,25 @@
     }
 
     .avatar {
-      width: 100px;
-      height: 100px;
+      width: 110px; height: 110px;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
       margin: 0 auto 1.5rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.5rem;
-      box-shadow: 0 0 30px rgba(108, 99, 255, 0.3);
+      font-size: 2.8rem;
+      box-shadow: 0 0 40px rgba(108, 99, 255, 0.35);
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 40px rgba(108, 99, 255, 0.35); }
+      50% { box-shadow: 0 0 60px rgba(108, 99, 255, 0.5); }
     }
 
     .hero h1 {
-      font-size: 2rem;
+      font-size: 2.2rem;
       font-weight: 700;
       margin-bottom: 0.5rem;
       background: linear-gradient(135deg, var(--text-primary), var(--accent-light));
@@ -202,9 +280,17 @@
     }
 
     .hero .tagline {
-      font-size: 1rem;
+      font-size: 1.05rem;
       color: var(--text-secondary);
-      margin-bottom: 1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero .bio {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      max-width: 500px;
+      margin: 0 auto 1.5rem;
+      line-height: 1.8;
     }
 
     .contact-row {
@@ -213,7 +299,6 @@
       flex-wrap: wrap;
       gap: 1rem;
       font-size: 0.85rem;
-      color: var(--text-muted);
     }
 
     .contact-row a {
@@ -221,83 +306,157 @@
       text-decoration: none;
       transition: color 0.3s;
     }
-
     .contact-row a:hover { color: var(--accent-light); }
 
     .contact-item {
       display: flex;
       align-items: center;
       gap: 0.3rem;
+      color: var(--text-muted);
     }
 
-    /* Skills */
+    /* Skills with Progress */
     .skills-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .skill-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .skill-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+    }
+
+    .skill-label span:first-child { color: var(--text-primary); }
+    .skill-label span:last-child { color: var(--text-muted); font-size: 0.8rem; }
+
+    .skill-bar {
+      height: 6px;
+      background: var(--progress-bg);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .skill-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+      border-radius: 3px;
+      width: 0;
+      transition: width 1.2s ease;
+    }
+
+    .skill-fill.animate { width: var(--level); }
+
+    /* Languages */
+    .lang-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 1rem;
     }
 
-    .skill-category h4 {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      margin-bottom: 0.5rem;
+    .lang-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.8rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
     }
 
-    .skill-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.3rem;
-    }
+    .lang-icon { font-size: 1.5rem; }
+
+    .lang-info h4 { font-size: 0.9rem; font-weight: 500; }
+    .lang-info p { font-size: 0.8rem; color: var(--text-muted); }
 
     /* Awards */
     .award-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.6rem 0;
+      padding: 0.7rem 0;
       border-bottom: 1px solid var(--border);
     }
-
     .award-item:last-child { border-bottom: none; }
+    .award-name { font-size: 0.9rem; }
+    .award-year { font-size: 0.8rem; color: var(--text-muted); }
 
-    .award-name {
-      font-size: 0.9rem;
-      color: var(--text-primary);
+    /* Activities & Hobbies */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
     }
 
-    .award-year {
-      font-size: 0.8rem;
-      color: var(--text-muted);
+    .activity-item, .hobby-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+      padding: 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
     }
+
+    .activity-icon, .hobby-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 0.1rem; }
+
+    .activity-info h4, .hobby-info h4 { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.2rem; }
+    .activity-info p, .hobby-info p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
 
     /* Print */
     @media print {
       body { background: #fff; color: #222; }
-      .bg-gradient { display: none; }
-      .card { background: #f9f9f9; border-color: #ddd; }
+      .bg-gradient, .topbar { display: none; }
+      .card { background: #f9f9f9; border-color: #ddd; box-shadow: none; }
       .hero h1 { -webkit-text-fill-color: #222; background: none; }
       .tag { background: #eee; border-color: #ccc; color: #555; }
-      .section { animation: none; opacity: 1; transform: none; }
+      .reveal { opacity: 1; transform: none; }
+      .card-desc { max-height: none; opacity: 1; }
+      .skill-fill { width: var(--level) !important; }
+      .section.collapsed .section-body { display: block; }
     }
 
     /* Responsive */
     @media (max-width: 600px) {
-      .container { padding: 2rem 1rem; }
+      .container { padding: 4rem 1rem 2rem; }
       .hero { padding: 2rem 1rem; }
-      .hero h1 { font-size: 1.6rem; }
+      .hero h1 { font-size: 1.7rem; }
       .card { padding: 1.2rem; }
       .skills-grid { grid-template-columns: 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .lang-grid { grid-template-columns: 1fr; }
+      .topbar { padding: 0.8rem 1rem; }
     }
   </style>
 </head>
 <body>
   <div class="bg-gradient"></div>
+
+  <div class="topbar">
+    <button id="themeToggle" title="切换主题">🌓</button>
+    <button id="expandAll" title="展开/折叠全部">📂</button>
+    <button id="printBtn" title="导出 PDF">📄</button>
+  </div>
+
   <div class="container">
 
-    <section class="hero section">
+    <!-- Hero -->
+    <section class="hero reveal">
       <div class="avatar">👨‍💻</div>
       <h1>你的名字</h1>
       <p class="tagline">高级前端工程师 / 全栈开发者</p>
+      <p class="bio">
+        热爱技术，专注于前端工程化与用户体验优化。<br>
+        5 年互联网大厂经验，主导过多个亿级流量项目的架构设计。<br>
+        开源爱好者，持续学习，乐于分享。
+      </p>
       <div class="contact-row">
         <span class="contact-item">📱 138-0000-0000</span>
         <span class="contact-item">✉️ <a href="mailto:your@email.com">your@email.com</a></span>
@@ -306,189 +465,429 @@
       </div>
     </section>
 
-    <section class="section">
-      <div class="section-title">教育背景</div>
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">北京大学</div>
-            <div class="card-subtitle">计算机科学与技术 · 硕士</div>
-          </div>
-          <div class="card-date">2018.09 - 2021.06</div>
-        </div>
-        <div class="card-desc">
-          GPA: 3.8/4.0 · 研究方向：分布式系统与微服务架构
-        </div>
+    <!-- 教育背景 -->
+    <section class="section reveal" data-section="edu">
+      <div class="section-header" onclick="toggleSection('edu')">
+        <div class="section-title">教育背景</div>
+        <span class="toggle-icon">▼</span>
       </div>
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">武汉大学</div>
-            <div class="card-subtitle">软件工程 · 学士</div>
-          </div>
-          <div class="card-date">2014.09 - 2018.06</div>
-        </div>
-        <div class="card-desc">
-          GPA: 3.6/4.0 · 优秀毕业设计
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-title">工作经历</div>
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">字节跳动</div>
-            <div class="card-subtitle">高级前端工程师</div>
-          </div>
-          <div class="card-date">2022.03 - 至今</div>
-        </div>
-        <div class="card-desc">
-          <ul>
-            <li>负责抖音电商核心交易链路的前端架构设计与性能优化</li>
-            <li>主导微前端架构升级，将页面加载性能提升 40%</li>
-            <li>搭建前端监控体系，实现线上问题 5 分钟内发现与定位</li>
-            <li>带领 5 人小组完成直播间购物车重构，转化率提升 12%</li>
-          </ul>
-        </div>
-        <div class="tags">
-          <span class="tag">React</span>
-          <span class="tag">TypeScript</span>
-          <span class="tag">微前端</span>
-          <span class="tag">性能优化</span>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">阿里巴巴</div>
-            <div class="card-subtitle">前端工程师</div>
-          </div>
-          <div class="card-date">2021.07 - 2022.02</div>
-        </div>
-        <div class="card-desc">
-          <ul>
-            <li>参与淘宝首页改版，负责模块化组件库建设</li>
-            <li>开发内部搭建平台，支持运营人员自主配置页面</li>
-            <li>优化首屏渲染速度，FCP 从 2.8s 降至 1.2s</li>
-          </ul>
-        </div>
-        <div class="tags">
-          <span class="tag">Vue</span>
-          <span class="tag">Node.js</span>
-          <span class="tag">Webpack</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-title">技能清单</div>
-      <div class="card">
-        <div class="skills-grid">
-          <div class="skill-category">
-            <h4>前端</h4>
-            <div class="skill-tags">
-              <span class="tag">React</span>
-              <span class="tag">Vue 3</span>
-              <span class="tag">TypeScript</span>
-              <span class="tag">Next.js</span>
-              <span class="tag">Tailwind CSS</span>
+      <div class="section-body">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">北京大学</div>
+              <div class="card-subtitle">计算机科学与技术 · 硕士</div>
             </div>
+            <div class="card-date">2018.09 - 2021.06</div>
           </div>
-          <div class="skill-category">
-            <h4>后端</h4>
-            <div class="skill-tags">
-              <span class="tag">Node.js</span>
-              <span class="tag">Go</span>
-              <span class="tag">Python</span>
-              <span class="tag">PostgreSQL</span>
-              <span class="tag">Redis</span>
-            </div>
+          <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
+          <div class="card-desc">
+            <ul>
+              <li>GPA: 3.8/4.0，专业排名前 5%</li>
+              <li>研究方向：分布式系统与微服务架构</li>
+              <li>发表 SCI 论文 2 篇，核心期刊 1 篇</li>
+              <li>国家奖学金获得者（2019、2020 连续两年）</li>
+              <li>担任 ACM 竞赛队队长，带队获区域赛金牌</li>
+            </ul>
           </div>
-          <div class="skill-category">
-            <h4>工程化</h4>
-            <div class="skill-tags">
-              <span class="tag">Webpack</span>
-              <span class="tag">Vite</span>
-              <span class="tag">Docker</span>
-              <span class="tag">CI/CD</span>
-              <span class="tag">Git</span>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">武汉大学</div>
+              <div class="card-subtitle">软件工程 · 学士</div>
             </div>
+            <div class="card-date">2014.09 - 2018.06</div>
           </div>
-          <div class="skill-category">
-            <h4>其他</h4>
-            <div class="skill-tags">
-              <span class="tag">微前端</span>
-              <span class="tag">GraphQL</span>
-              <span class="tag">性能优化</span>
-              <span class="tag">前端监控</span>
-            </div>
+          <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
+          <div class="card-desc">
+            <ul>
+              <li>GPA: 3.6/4.0，优秀毕业设计</li>
+              <li>校级优秀学生干部，连续 3 年获甲等奖学金</li>
+              <li>辅修金融学，获经济学学士双学位</li>
+            </ul>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section">
-      <div class="section-title">项目经历</div>
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">抖音电商交易中台</div>
-          <div class="card-date">2023.01 - 2023.12</div>
-        </div>
-        <div class="card-desc">
-          <ul>
-            <li>统一电商交易链路的前端架构，支撑百亿级 GMV 交易场景</li>
-            <li>设计插件化交易组件体系，新业务接入周期从 2 周缩短至 2 天</li>
-            <li>实现按需加载与骨架屏方案，核心页面 LCP 降低 35%</li>
-          </ul>
-        </div>
-        <div class="tags">
-          <span class="tag">React</span>
-          <span class="tag">TypeScript</span>
-          <span class="tag">微前端</span>
-          <span class="tag">性能优化</span>
-        </div>
+    <!-- 工作经历 -->
+    <section class="section reveal" data-section="work">
+      <div class="section-header" onclick="toggleSection('work')">
+        <div class="section-title">工作经历</div>
+        <span class="toggle-icon">▼</span>
       </div>
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">前端性能监控平台</div>
-          <div class="card-date">2022.06 - 2022.12</div>
+      <div class="section-body">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">字节跳动</div>
+              <div class="card-subtitle">高级前端工程师 · 技术 Leader</div>
+            </div>
+            <div class="card-date">2022.03 - 至今</div>
+          </div>
+          <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
+          <div class="card-desc">
+            <ul>
+              <li>负责抖音电商核心交易链路的前端架构设计与性能优化</li>
+              <li>主导微前端架构升级，将页面加载性能提升 40%，首屏时间从 2.5s 降至 1.5s</li>
+              <li>搭建前端监控体系（异常 + 性能 + 用户行为），实现线上问题 5 分钟内发现与定位</li>
+              <li>带领 5 人小组完成直播间购物车重构，转化率提升 12%，GMV 增长 8%</li>
+              <li>推动团队 TypeScript 全面落地，编写技术文档 30+ 篇，组织内部分享 10+ 次</li>
+              <li>获年度优秀员工（Top 10%），晋升答辩通过</li>
+            </ul>
+          </div>
+          <div class="tags">
+            <span class="tag">React</span>
+            <span class="tag">TypeScript</span>
+            <span class="tag">微前端</span>
+            <span class="tag">性能优化</span>
+            <span class="tag">团队管理</span>
+          </div>
         </div>
-        <div class="card-desc">
-          <ul>
-            <li>从零搭建前端监控系统，覆盖异常采集、性能采集、用户行为追踪</li>
-            <li>支持自定义报警规则，实现线上问题自动发现与分级通知</li>
-            <li>日均处理 5000 万条数据，报警准确率达 95%</li>
-          </ul>
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">阿里巴巴</div>
+              <div class="card-subtitle">前端工程师 · P6</div>
+            </div>
+            <div class="card-date">2021.07 - 2022.02</div>
+          </div>
+          <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
+          <div class="card-desc">
+            <ul>
+              <li>参与淘宝首页改版，负责模块化组件库建设，支撑 200+ 运营页面</li>
+              <li>开发内部低代码搭建平台，支持运营人员自主配置页面，效率提升 60%</li>
+              <li>优化首屏渲染速度，FCP 从 2.8s 降至 1.2s，LCP 降低 45%</li>
+              <li>参与双 11 大促保障，确保亿级流量下零故障</li>
+            </ul>
+          </div>
+          <div class="tags">
+            <span class="tag">Vue 3</span>
+            <span class="tag">Node.js</span>
+            <span class="tag">Webpack</span>
+            <span class="tag">低代码</span>
+          </div>
         </div>
-        <div class="tags">
-          <span class="tag">Node.js</span>
-          <span class="tag">Kafka</span>
-          <span class="tag">ClickHouse</span>
-          <span class="tag">React</span>
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">美团</div>
+              <div class="card-subtitle">前端实习生</div>
+            </div>
+            <div class="card-date">2020.06 - 2020.12</div>
+          </div>
+          <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
+          <div class="card-desc">
+            <ul>
+              <li>参与外卖商家端后台系统开发，负责订单管理模块</li>
+              <li>封装通用表格组件，被 3 个业务线复用</li>
+              <li>编写自动化测试用例 50+，覆盖率提升至 85%</li>
+            </ul>
+          </div>
+          <div class="tags">
+            <span class="tag">React</span>
+            <span class="tag">Ant Design</span>
+            <span class="tag">Jest</span>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="section">
-      <div class="section-title">荣誉奖项</div>
-      <div class="card">
-        <div class="award-item">
-          <span class="award-name">字节跳动年度优秀员工</span>
-          <span class="award-year">2023</span>
+    <!-- 技能清单 -->
+    <section class="section reveal" data-section="skills">
+      <div class="section-header" onclick="toggleSection('skills')">
+        <div class="section-title">技能清单</div>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="section-body">
+        <div class="card">
+          <div class="skills-grid">
+            <div class="skill-item">
+              <div class="skill-label"><span>React / Next.js</span><span>95%</span></div>
+              <div class="skill-bar"><div class="skill-fill" style="--level: 95%"></div></div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-label"><span>TypeScript</span><span>90%</span></div>
+              <div class="skill-bar"><div class="skill-fill" style="--level: 90%"></div></div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-label"><span>Vue 3 / Nuxt</span><span>85%</span></div>
+              <div class="skill-bar"><div class="skill-fill" style="--level: 85%"></div></div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-label"><span>Node.js / Go</span><span>80%</span></div>
+              <div class="skill-bar"><div class="skill-fill" style="--level: 80%"></div></div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-label"><span>Python</span><span>75%</span></div>
+              <div class="skill-bar"><div class="skill-fill" style="--level: 75%"></div></div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-label"><span>Docker / K8s</span><span>70%</span></div>
+              <div class="skill-bar"><div class="skill-fill" style="--level: 70%"></div></div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-label"><span>PostgreSQL / Redis</span><span>78%</span></div>
+              <div class="skill-bar"><div class="skill-fill" style="--level: 78%"></div></div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-label"><span>Webpack / Vite</span><span>88%</span></div>
+              <div class="skill-bar"><div class="skill-fill" style="--level: 88%"></div></div>
+            </div>
+          </div>
         </div>
-        <div class="award-item">
-          <span class="award-name">ACM-ICPC 亚洲区域赛金牌</span>
-          <span class="award-year">2017</span>
+      </div>
+    </section>
+
+    <!-- 项目经历 -->
+    <section class="section reveal" data-section="projects">
+      <div class="section-header" onclick="toggleSection('projects')">
+        <div class="section-title">项目经历</div>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="section-body">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">抖音电商交易中台</div>
+            <div class="card-date">2023.01 - 2023.12</div>
+          </div>
+          <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
+          <div class="card-desc">
+            <ul>
+              <li>统一电商交易链路的前端架构，支撑百亿级 GMV 交易场景</li>
+              <li>设计插件化交易组件体系，新业务接入周期从 2 周缩短至 2 天</li>
+              <li>实现按需加载与骨架屏方案，核心页面 LCP 降低 35%</li>
+              <li>主导技术方案评审，输出架构设计文档 15 篇</li>
+            </ul>
+          </div>
+          <div class="tags">
+            <span class="tag">React</span>
+            <span class="tag">TypeScript</span>
+            <span class="tag">微前端</span>
+            <span class="tag">性能优化</span>
+          </div>
         </div>
-        <div class="award-item">
-          <span class="award-name">北京大学优秀毕业论文</span>
-          <span class="award-year">2021</span>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">前端性能监控平台</div>
+            <div class="card-date">2022.06 - 2022.12</div>
+          </div>
+          <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
+          <div class="card-desc">
+            <ul>
+              <li>从零搭建前端监控系统，覆盖异常采集、性能采集、用户行为追踪</li>
+              <li>支持自定义报警规则，实现线上问题自动发现与分级通知</li>
+              <li>日均处理 5000 万条数据，报警准确率达 95%</li>
+              <li>获部门创新奖，方案被推广至集团 3 个 BU</li>
+            </ul>
+          </div>
+          <div class="tags">
+            <span class="tag">Node.js</span>
+            <span class="tag">Kafka</span>
+            <span class="tag">ClickHouse</span>
+            <span class="tag">React</span>
+          </div>
         </div>
-        <div class="award-item">
-          <span class="award-name">Google Summer of Code 贡献者</span>
-          <span class="award-year">2019</span>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">开源组件库 AwesomeUI</div>
+            <div class="card-date">2021.09 - 至今</div>
+          </div>
+          <button class="expand-btn" onclick="toggleCard(this)">展开详情 ▾</button>
+          <div class="card-desc">
+            <ul>
+              <li>个人开源项目，基于 React + TypeScript 的企业级 UI 组件库</li>
+              <li>GitHub 2.8k Stars，npm 周下载量 5000+</li>
+              <li>包含 60+ 组件，完善的文档与示例，支持主题定制</li>
+              <li>获 2023 年度最受欢迎开源项目提名</li>
+            </ul>
+          </div>
+          <div class="tags">
+            <span class="tag">React</span>
+            <span class="tag">TypeScript</span>
+            <span class="tag">Storybook</span>
+            <span class="tag">Rollup</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 资格证书 -->
+    <section class="section reveal" data-section="certs">
+      <div class="section-header" onclick="toggleSection('certs')">
+        <div class="section-title">资格证书</div>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="section-body">
+        <div class="card">
+          <div class="award-item">
+            <span class="award-name">AWS Certified Solutions Architect</span>
+            <span class="award-year">2023</span>
+          </div>
+          <div class="award-item">
+            <span class="award-name">PMP 项目管理专业人士认证</span>
+            <span class="award-year">2022</span>
+          </div>
+          <div class="award-item">
+            <span class="award-name">阿里云高级工程师认证</span>
+            <span class="award-year">2021</span>
+          </div>
+          <div class="award-item">
+            <span class="award-name">软件设计师（中级）</span>
+            <span class="award-year">2019</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 语言能力 -->
+    <section class="section reveal" data-section="langs">
+      <div class="section-header" onclick="toggleSection('langs')">
+        <div class="section-title">语言能力</div>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="section-body">
+        <div class="card">
+          <div class="lang-grid">
+            <div class="lang-item">
+              <span class="lang-icon">🇨🇳</span>
+              <div class="lang-info">
+                <h4>中文</h4>
+                <p>母语</p>
+              </div>
+            </div>
+            <div class="lang-item">
+              <span class="lang-icon">🇬🇧</span>
+              <div class="lang-info">
+                <h4>英语</h4>
+                <p>流利（IELTS 7.5 / CET-6 620）</p>
+              </div>
+            </div>
+            <div class="lang-item">
+              <span class="lang-icon">🇯🇵</span>
+              <div class="lang-info">
+                <h4>日语</h4>
+                <p>基础会话（N3）</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 荣誉奖项 -->
+    <section class="section reveal" data-section="awards">
+      <div class="section-header" onclick="toggleSection('awards')">
+        <div class="section-title">荣誉奖项</div>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="section-body">
+        <div class="card">
+          <div class="award-item">
+            <span class="award-name">字节跳动年度优秀员工（Top 10%）</span>
+            <span class="award-year">2023</span>
+          </div>
+          <div class="award-item">
+            <span class="award-name">ACM-ICPC 亚洲区域赛金牌</span>
+            <span class="award-year">2017</span>
+          </div>
+          <div class="award-item">
+            <span class="award-name">北京大学优秀毕业论文</span>
+            <span class="award-year">2021</span>
+          </div>
+          <div class="award-item">
+            <span class="award-name">Google Summer of Code 贡献者</span>
+            <span class="award-year">2019</span>
+          </div>
+          <div class="award-item">
+            <span class="award-name">国家奖学金（连续两年）</span>
+            <span class="award-year">2019-2020</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 社会活动 -->
+    <section class="section reveal" data-section="activities">
+      <div class="section-header" onclick="toggleSection('activities')">
+        <div class="section-title">社会活动</div>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="section-body">
+        <div class="card">
+          <div class="grid-2">
+            <div class="activity-item">
+              <span class="activity-icon">🎤</span>
+              <div class="activity-info">
+                <h4>技术博客作者</h4>
+                <p>在掘金、知乎发表技术文章 50+ 篇，累计阅读量 100 万+，关注者 5000+</p>
+              </div>
+            </div>
+            <div class="activity-item">
+              <span class="activity-icon">🏫</span>
+              <div class="activity-info">
+                <h4>开源社区 Maintainer</h4>
+                <p>维护 AwesomeUI 开源项目，审阅 PR 200+，培养新人贡献者 30+</p>
+              </div>
+            </div>
+            <div class="activity-item">
+              <span class="activity-icon">🤝</span>
+              <div class="activity-info">
+                <h4>技术大会演讲者</h4>
+                <p>QCon、GMTC 等大会分享 5 次，主题涵盖微前端、性能优化、工程化</p>
+              </div>
+            </div>
+            <div class="activity-item">
+              <span class="activity-icon">💡</span>
+              <div class="activity-info">
+                <h4>内推达人</h4>
+                <p>累计内推 50+ 人，成功入职 20+，获公司内推白金勋章</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 兴趣爱好 -->
+    <section class="section reveal" data-section="hobbies">
+      <div class="section-header" onclick="toggleSection('hobbies')">
+        <div class="section-title">兴趣爱好</div>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="section-body">
+        <div class="card">
+          <div class="grid-2">
+            <div class="hobby-item">
+              <span class="hobby-icon">🏃</span>
+              <div class="hobby-info">
+                <h4>跑步 / 马拉松</h4>
+                <p>完成 3 次全马，最好成绩 3 小时 45 分</p>
+              </div>
+            </div>
+            <div class="hobby-item">
+              <span class="hobby-icon">📷</span>
+              <div class="hobby-info">
+                <h4>摄影</h4>
+                <p>街拍与风光摄影，500px 签约摄影师</p>
+              </div>
+            </div>
+            <div class="hobby-item">
+              <span class="hobby-icon">📚</span>
+              <div class="hobby-info">
+                <h4>阅读</h4>
+                <p>年均阅读 30+ 本，偏好技术与人文类</p>
+              </div>
+            </div>
+            <div class="hobby-item">
+              <span class="hobby-icon">🎮</span>
+              <div class="hobby-info">
+                <h4>独立游戏</h4>
+                <p>关注独立游戏开发，自学 Unity 基础</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -496,20 +895,71 @@
   </div>
 
   <script>
-    const observer = new IntersectionObserver((entries) => {
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') html.setAttribute('data-theme', 'light');
+
+    themeToggle.addEventListener('click', () => {
+      const isLight = html.getAttribute('data-theme') === 'light';
+      html.setAttribute('data-theme', isLight ? '' : 'light');
+      localStorage.setItem('theme', isLight ? 'dark' : 'light');
+      themeToggle.textContent = isLight ? '🌓' : '🌓';
+    });
+
+    // Scroll Reveal
+    const revealObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          entry.target.style.animationPlayState = 'running';
+          entry.target.classList.add('visible');
+          // Animate skill bars
+          entry.target.querySelectorAll('.skill-fill').forEach(bar => {
+            bar.classList.add('animate');
+          });
         }
       });
     }, { threshold: 0.1 });
 
-    document.querySelectorAll('.section').forEach(el => {
-      el.style.animationPlayState = 'paused';
-      observer.observe(el);
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    // Section Toggle
+    function toggleSection(id) {
+      const section = document.querySelector(`[data-section="${id}"]`);
+      section.classList.toggle('collapsed');
+    }
+
+    // Card Expand/Collapse
+    function toggleCard(btn) {
+      const card = btn.closest('.card');
+      const isExpanded = card.classList.contains('expanded');
+      card.classList.toggle('expanded');
+      btn.textContent = isExpanded ? '展开详情 ▾' : '收起 ▴';
+    }
+
+    // Expand All
+    const expandAllBtn = document.getElementById('expandAll');
+    let allExpanded = false;
+    expandAllBtn.addEventListener('click', () => {
+      allExpanded = !allExpanded;
+      document.querySelectorAll('.card').forEach(card => {
+        if (allExpanded) {
+          card.classList.add('expanded');
+          const btn = card.querySelector('.expand-btn');
+          if (btn) btn.textContent = '收起 ▴';
+        } else {
+          card.classList.remove('expanded');
+          const btn = card.querySelector('.expand-btn');
+          if (btn) btn.textContent = '展开详情 ▾';
+        }
+      });
+      document.querySelectorAll('.section.collapsed').forEach(s => s.classList.remove('collapsed'));
     });
 
-    document.querySelector('.hero').style.animationPlayState = 'running';
+    // Print / PDF
+    document.getElementById('printBtn').addEventListener('click', () => {
+      window.print();
+    });
   </script>
 </body>
 </html>
